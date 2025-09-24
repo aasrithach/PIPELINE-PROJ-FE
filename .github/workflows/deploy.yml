@@ -1,15 +1,15 @@
-name: Deploy to GitHub Pages
+name: Build and Deploy
 
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:   # allows manual trigger for deployment
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-    
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -26,10 +26,24 @@ jobs:
     - name: Build
       run: npm run build
 
+    - name: Commit build to build branch
+      run: |
+        git config --local user.name "github-actions[bot]"
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git add -f dist
+        git commit -m "Add built files [skip ci]" || echo "No changes to commit"
+        git push origin HEAD:build
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'workflow_dispatch'  # only runs when manually triggered
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
     - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./dist
-        cname: # Add your custom domain here if needed
