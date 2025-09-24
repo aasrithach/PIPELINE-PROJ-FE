@@ -3,8 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
- "homepage": "/frontapp1",
-
+  "homepage": "https://2300030756-SUHITHA.github.io/feedback_management",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
